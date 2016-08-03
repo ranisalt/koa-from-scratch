@@ -1,9 +1,9 @@
 import Koa from 'koa'
 import Router from 'koa-router'
-import todo from './routes/todo'
+import todos from './routes/todos'
 
 const app = new Koa()
 const router = new Router()
-router.use('/todo', todo.routes(), todo.allowedMethods())
+router.use('/todos', todos.routes(), todos.allowedMethods())
 app.use(router.routes())
 app.listen(3000)

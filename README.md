@@ -71,7 +71,7 @@ npm install --save koa-router@next
 ```
 
 I like to put controllers inside a `routes` directory for structure purposes.
-So, let's create our first controller on `routes/todo.js` and start by the
+So, let's create our first controller on `routes/todos.js` and start by the
 index:
 
 ```js
@@ -107,11 +107,11 @@ talk about middlewares? `koa-router` can generate a middleware for you, which
 maps the request to the responding function:
 
 ```js
-import todo from './routes/todo'
+import todos from './routes/todos'
 
 (...)
 
-app.use(todo.routes())
+app.use(todos.routes())
 ```
 
 Easy, huh? It's worth mentioning that middlewares are called sequentially, so
@@ -122,12 +122,12 @@ templating) are called first. I suggest adding routes just above `listen`, see
 Fire up your server and hit `localhost:3000` and you will se an empty JSON
 array, which is what we defined as the body of the response.
 
-But say we want all our todo REST under the `/todo` prefix. That's easy too,
+But say we want all our todo REST under the `/todos` prefix. That's easy too,
 import `koa-router` here too and replace the `app.use` line with the following:
 
 ```js
 const router = new Router()
-router.use('/todo', todo.routes(), todo.allowedMethods())
+router.use('/todos', todos.routes(), todos.allowedMethods())
 app.use(router.routes())
 ```
 

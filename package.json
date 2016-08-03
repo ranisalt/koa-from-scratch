@@ -18,7 +18,8 @@
   },
   "homepage": "https://github.com/ranisalt/koa-from-scratch#readme",
   "dependencies": {
-    "koa": "^2.0.0-alpha.4"
+    "koa": "^2.0.0-alpha.4",
+    "koa-router": "^7.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",

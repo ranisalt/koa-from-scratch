@@ -135,8 +135,56 @@ That's right, we can nest routes to achieve nice functionality. Say some of your
 modules (sets of REST endpoints, such as `todo` here) lie inside an `admin`
 prefix, you can just keep nesting routers to achieve the desired endpoint URIs.
 
+### Pro-tip
+You can toggle debugging messages with the `DEBUG` environment variable. To see
+all Koa-related debug log, run `env DEBUG=koa* npm start` instead. You will also
+see the *regex* generated for every endpoint.
+
+## Adding more routes
+
+Now we want to be able to add, update and delete our todos. Let's add one POST
+route to `/todos` to add one more to the list, as a REST API does, but for that
+we need to parse the body of the request. The package
+[koa-bodyparser][koa-bodyparser-url] is our friend here:
+
+```sh
+npm install --save koa-bodyparser@next
+```
+
+Import it and add to the app **before** the routes are added:
+
+```js
+import bodyparser from 'koa-bodyparser'
+
+(...)
+
+app.use(bodyparser())
+```
+
+Now, to access body content, use `ctx.request.body` on a route. By the way,
+that's ES7 destructuring assignment, meaning `title = ctx.request.body.title`:
+
+```js
+router.post('/', async ctx => {
+  const {title} = ctx.request.body
+  todos.push({title, completed: false})
+  ctx.status = 204
+})
+```
+
+The response has status code 204 Created and empty body. You can post a new todo
+and go to the index again to check it has been inserted. I'll use curl for
+simplicity:
+
+```sh
+curl localhost:3000 -H "Content-Type: application/json" --data '{"title": "Be awesome"}'
+```
+
+Now hit `/todos` and you will see we added it :)
+
 [babel-url]: https://babeljs.io/
 [koa-url]: https://github.com/koajs/koa/tree/v2.x
+[koa-bodyparser-url]: https://github.com/koajs/bodyparser/tree/next
 [koa-router-url]: https://github.com/alexmingoia/koa-router/tree/master
 [mongorito-url]: https://github.com/vdemedes/mongorito
 [react-url]: https://github.com/facebook/react

@@ -1,0 +1,28 @@
+{
+  "name": "koa-from-scratch",
+  "version": "1.0.0",
+  "description": "Building a TodoMVC from scratch using Mongorito/Koa/React/Node.js + Argon2",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ranisalt/koa-from-scratch.git"
+  },
+  "author": "Ranieri Althoff <ranisalt@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ranisalt/koa-from-scratch/issues"
+  },
+  "homepage": "https://github.com/ranisalt/koa-from-scratch#readme",
+  "dependencies": {
+    "koa": "^2.0.0-alpha.4"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-0": "^6.5.0"
+  }
+}

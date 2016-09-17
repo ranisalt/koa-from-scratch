@@ -26,7 +26,7 @@ application looks like this (call it `server.js`):
 ```js
 import Koa from 'koa'
 
-const app = new Koa()
+export const app = new Koa()
 app.listen(3000)
 ```
 
@@ -35,13 +35,14 @@ either with `node server.js` or `npm start` you will see that... it breaks,
 because syntax is unsupported (as of Node 6). Let's install Babel, then:
 
 ```sh
-npm install --save-dev babel-cli babel-preset-{es2015,stage-0}
+npm install --save-dev babel-cli babel-preset-{es2015,stage-0} babel-plugin-transform-runtime
 ```
 
 Now we add a configuration file (`.babelrc`), with the following configuration:
 
 ```js
 {
+  "plugins": ["transform-runtime"],
   "presets": ["es2015", "stage-0"]
 }
 ```

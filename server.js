@@ -3,7 +3,7 @@ import bodyparser from 'koa-bodyparser'
 import Router from 'koa-router'
 import todos from './routes/todos'
 
-const app = new Koa()
+export const app = new Koa()
 app.use(bodyparser())
 
 const router = new Router()

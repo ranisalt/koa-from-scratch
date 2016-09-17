@@ -183,9 +183,107 @@ curl localhost:3000 -H "Content-Type: application/json" --data '{"title": "Be aw
 
 Now hit `/todos` and you will see we added it :)
 
+# It needs some testing
+Oh yeah, we got to the part every developer loves: unit testing. I know it
+should exist from the start, but I wanted to be more straightforward.
+
+For this, we'll use [ava][ava-url], a minimal but very fast test runner with
+modern feature support, such as async functions that we already know. We will
+also use [nyc][nyc-url] for coverage report. We need a mock client to fake
+requests to the API, and for that we will use [supertest][supertest-url], but it
+uses callbacks, let's use [supertest-as-promised][supertest-as-promised-url]
+wrapper. Go get them, npm:
+
+```sh
+npm install --save-dev ava nyc supertest{,-as-promised}
+```
+
+Create a `todos.spec.js` under the `test` directory and import the dependencies:
+
+```js
+import test from 'ava'
+import request from 'supertest-as-promised'
+
+import {app} from '../server'
+```
+
+For each test, we create a request client using the `beforeEach` hook:
+
+```js
+test.beforeEach(async t => {
+  t.context.request = request(app.callback())
+})
+```
+
+Every test and hook on ava has a parameter that represents test state. Modifying
+the `context` key on it creates values that persists, so the request instance
+will be accessible within tests. `app.callback()` will return a function that
+actually processes HTTP requests, and we plug it into `supertest`. In fact, that
+is how `app.listen(3000)` we used before works, but handing the `callback()` to
+a Node.js HTTP server.
+
+Every test on ava runs on a separate Node.js instance, so we can assume our app
+is on a clean state. Let's first assure the todo-list is empty:
+
+```js
+test('listing is empty', async t => {
+  const res = await t.context.request.get('/todos')
+  t.is(res.status, 200)
+  t.is(res.type, 'application/json')
+  t.is(res.body.length, 0)
+})
+```
+
+Ah! Don't forget we need to change some things on `package.json`. First, change
+the `test` script to run ava with nyc:
+
+```js
+"scripts": {
+  "start": "babel-node server.js",
+  "test": "nyc ava"
+},
+```
+
+Simple as that, since we are using the default file and path names for tests.
+Also, let's inform ava we want to use babel:
+
+```js
+"ava": {
+  "babel": "inherit",
+  "require": "babel-register"
+}
+```
+
+Run the test for the first time with:
+
+```sh
+npm test
+```
+
+And it should pass the test and output coverage status. We still do not cover
+the post new todo route, let's fix it:
+
+```js
+test('create new listing', async t => {
+  let res = await t.context.request.post('/todos').send({
+    title: 'Be awesome'
+  })
+  t.is(res.status, 204)
+
+  res = await t.context.request.get('/todos')
+  t.is(res.body.length, 1)
+})
+```
+
+And run the test again. Oh man, do you smell that 100% coverage sweet scent?
+
+[ava-url]: https://github.com/avajs/ava
 [babel-url]: https://babeljs.io/
 [koa-url]: https://github.com/koajs/koa/tree/v2.x
 [koa-bodyparser-url]: https://github.com/koajs/bodyparser/tree/next
 [koa-router-url]: https://github.com/alexmingoia/koa-router/tree/master
+[nyc-url]: https://github.com/istanbuljs/nyc
 [mongorito-url]: https://github.com/vdemedes/mongorito
 [react-url]: https://github.com/facebook/react
+[supertest-url]: https://github.com/visionmedia/supertest
+[supertest-as-promised-url]: https://github.com/WhoopInc/supertest-as-promised

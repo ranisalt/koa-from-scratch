@@ -1,15 +1,18 @@
 import Router from 'koa-router'
+import {Model} from 'mongorito'
+
+export class Todo extends Model {}
 
 const router = new Router()
-const todos = []
 
 router.get('/', async ctx => {
-  ctx.body = todos
+  ctx.body = await Todo.all()
 })
 
 router.post('/', async ctx => {
   const {title} = ctx.request.body
-  todos.push({title, completed: false})
+  const todo = new Todo({title, completed: false})
+  await todo.save()
   ctx.status = 204
 })
 

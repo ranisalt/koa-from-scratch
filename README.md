@@ -277,6 +277,85 @@ test('create new listing', async t => {
 
 And run the test again. Oh man, do you smell that 100% coverage sweet scent?
 
+# Storing with Mongorito
+
+Mongorito is a driver for MongoDB that fits perfectly with Koa. It uses async
+functions so the syntax is very sweet. Also, since Mongo stores documents in a
+JSON-like syntax, we can use JS native objects seamlessly.
+
+```sh
+npm install --save mongorito
+```
+
+To use Mongorito, you need to import it in the main app file (`server.js`) and
+connect. We'll use an environment variable to get the server URI, as it is a
+common pattern around platforms (e.g. Heroku):
+
+```js
+import Mongorito from 'mongorito'
+
+(...)
+
+Mongorito.connect(process.env.MONGODB_URI)
+```
+
+Also, import Mongorito's Model to create a new... model. For simplicity, and
+since we are not having any special behavior in our model (for now), let's just
+declare it on the routes file (`routes/todos.js`):
+
+```js
+import {Model} from 'mongorito'
+
+export class Todo extends Model {}
+```
+
+Extending Mongorito models gives you a lot of useful methods, such as `find()`
+and `save()`, besides `get()`, `set()` and a constructor. We need to change the
+routes to use instances of models:
+
+```js
+router.get('/', async ctx => {
+  ctx.body = await Todo.find()
+})
+
+router.post('/', async ctx => {
+  const {title} = ctx.request.body
+  const todo = new Todo({title, completed: false})
+  await todo.save()
+  ctx.status = 204
+})
+```
+
+Simple enough. If we wanted to filter todos anyhow, we would pass a filter
+object to the `find()` method. `find()` is also aliased to `all()` for better
+function naming. Suppose we want to check all completed todos:
+
+```js
+router.get('/completed', async ctx => {
+  ctx.body = await Todo.find({completed: true})
+})
+```
+
+One more change, now our tests need to cleanup the database on each test, as
+data won't be reset in the DB as it did with the array.
+
+```js
+import {Todo} from '../routes/todos'
+
+test.beforeEach(async t => {
+  await Todo.remove()
+  t.context.request = request(app.callback())
+})
+```
+
+And that's it. Don't forget we don't need the todo array anymore, as everything
+will be stored on the Mongo server. You can just run tests or spin up the server
+and check with the same curl used above. Don't forget to set `MONGODB_URI`.
+
+```sh
+env MONGODB_URI=localhost/todos npm test
+```
+
 [ava-url]: https://github.com/avajs/ava
 [babel-url]: https://babeljs.io/
 [koa-url]: https://github.com/koajs/koa/tree/v2.x

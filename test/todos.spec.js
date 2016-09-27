@@ -2,8 +2,10 @@ import test from 'ava'
 import request from 'supertest-as-promised'
 
 import {app} from '../server'
+import {Todo} from '../routes/todos'
 
 test.beforeEach(async t => {
+  await Todo.remove()
   t.context.request = request(app.callback())
 })
 

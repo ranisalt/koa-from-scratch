@@ -4,7 +4,7 @@ import Router from 'koa-router'
 import Mongorito from 'mongorito'
 import todos from './routes/todos'
 
-Mongorito.connect(process.env.MONGODB_URI)
+Mongorito.connect(`mongodb://${process.env.MONGODB_URI}`)
 
 export const app = new Koa()
 app.use(bodyparser())

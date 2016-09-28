@@ -16,4 +16,20 @@ router.post('/', async ctx => {
   ctx.status = 204
 })
 
+router.param('todo', async (id, ctx, next) => {
+  ctx.todo = await Todo.findById(id)
+  await next()
+})
+
+router.patch('/:todo', async ctx => {
+  const {completed} = ctx.request.body
+  if (completed != null) {
+    ctx.todo.set('completed', completed)
+  }
+
+  await ctx.todo.save()
+  ctx.status = 200
+  ctx.body = {todo: ctx.todo}
+})
+
 export default router

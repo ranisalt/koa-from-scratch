@@ -16,7 +16,7 @@ test('listing is empty', async t => {
   t.is(res.body.length, 0)
 })
 
-test('create new listing', async t => {
+test('create new resource', async t => {
   let res = await t.context.request.post('/todos').send({
     title: 'Be awesome'
   })
@@ -24,4 +24,16 @@ test('create new listing', async t => {
 
   res = await t.context.request.get('/todos')
   t.is(res.body.length, 1)
+})
+
+test('edit resource', async t => {
+  const {body} = await t.context.request.post('/todos').send({
+    title: 'Be awesome'
+  })
+
+  let res = await t.context.request.patch(`/todos/${body._id}`).send({
+    completed: true
+  })
+  const {todo} = res.body
+  t.is(todo.completed, true)
 })

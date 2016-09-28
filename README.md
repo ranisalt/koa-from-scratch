@@ -357,6 +357,55 @@ and check with the same curl used above. Don't forget to set `MONGODB_URI`.
 env MONGODB_URI=localhost/todos npm test
 ```
 
+# Manipulating data
+
+Until now, the routes provided can show and create new todos, but it is missing
+the ability to edit (e.g. mark as completed) and remove them. With REST APIs,
+endpoints related to specific resources are generally in the form `/<type>/<id>`
+and `koa-router` has a great way to deal with those routes.
+
+Besides `get()` and `put()` we already use, we create a middleware to routes
+that take parameters using `param()`:
+
+```js
+router.param('todo', async (id, ctx, next) => {
+  ctx.todo = await Todo.findById(id)
+  await next()
+})
+```
+
+Awaiting `next()` means calling the next middleware. Later we will use
+'try`/`catch` to check if everything worked or any error occurred.
+
+Every route that takes a `:todo` will now have a bound a todo to the context.
+Example, to `patch()` a resource:
+
+```js
+router.patch('/:todo', async ctx => {
+  const {completed} = ctx.request.body
+  if (completed != null) {
+    ctx.todo.set('completed', completed)
+  }
+
+  await ctx.todo.save()
+  ctx.status = 200
+  ctx.body = {todo: ctx.todo}
+})
+```
+
+It's needed to check if the body actually contains data to be updated, in our
+case only `completed`. Then, save the mutated object, set the status code and
+return body.
+
+Let's also provide a deletion route, this one is easy:
+
+```js
+router.delete('/:user', async ctx => {
+  await ctx.user.remove()
+  ctx.status = 204
+})
+```
+
 [ava-url]: https://github.com/avajs/ava
 [babel-url]: https://babeljs.io/
 [koa-url]: https://github.com/koajs/koa/tree/v2.x

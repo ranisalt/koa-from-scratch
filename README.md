@@ -241,7 +241,7 @@ the `test` script to run ava with nyc:
 ```js
 "scripts": {
   "start": "babel-node server.js",
-  "test": "nyc ava"
+  "test": "nyc ava --serial"
 },
 ```
 

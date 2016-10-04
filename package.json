@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "babel-node server.js",
-    "test": "nyc ava"
+    "test": "nyc ava --serial"
   },
   "repository": {
     "type": "git",

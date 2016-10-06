@@ -183,7 +183,7 @@ curl localhost:3000 -H "Content-Type: application/json" --data '{"title": "Be aw
 
 Now hit `/todos` and you will see we added it :)
 
-# It needs some testing
+## It needs some testing
 
 Oh yeah, we got to the part every developer loves: unit testing. I know it
 should exist from the start, but I wanted to be more straightforward.
@@ -276,7 +276,7 @@ test('create new resource', async t => {
 
 And run the test again. Oh man, do you smell that 100% coverage sweet scent?
 
-# Storing with Mongorito
+## Storing with Mongorito
 
 Mongorito is a driver for MongoDB that fits perfectly with Koa. It uses async
 functions so the syntax is very sweet. Also, since Mongo stores documents in a
@@ -355,7 +355,7 @@ and check with the same curl used above. Don't forget to set `MONGODB_URI`.
 env MONGODB_URI=localhost/todos npm test
 ```
 
-# Manipulating data
+## Manipulating data
 
 Until now, the routes provided can show and create new todos, but it is missing
 the ability to edit (e.g. mark as completed) and remove them. With REST APIs,

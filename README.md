@@ -444,6 +444,120 @@ test('delete resource', async t => {
 
 Well, that's it. Our model is complete now.
 
+## Creating some users
+
+Now we'll get to a nice feature of Mongorito, hooks. We will model our users
+safely, hashing their passwords with a strong algorithm. Later on we will only
+let users view and create their own todos. Since the app is very minimalistic,
+REST is a simple pattern and we don't need no complex stuff, a user model and
+routes is very much like the todos.
+
+I'll use the `argon2` module (disclaimer: shameless self-promotion, I'm the
+author) to properly hash and verify the passwords. Install it:
+
+```sh
+npm install --save argon2
+```
+
+Our user model will have username and password only and we will make sure those
+fields are filled prior to saving using the `save` hook:
+
+```js
+export class User extends Model {
+  configure() {
+    this.before('save', async () => {
+      if (!this.get('name')) {
+        throw new Error('Missing name.')
+      }
+
+      if (!this.get('password')) {
+        throw new Error('Missing password.')
+      }
+    })
+  }
+
+  async verify(password) {
+    return await argon2.verify(this.get('password'), password)
+  }
+}
+```
+
+So, what it does is before saving, checking if both the user name and password
+are not empty. As empty strings evaluate to false in JS, there's no need to
+`!== ''` or `.length == 0`, but you can just in case (please don't).
+
+Additionally, the model is extended with a nice function to check the password.
+
+The post and patch routes need to hash the password, and the argon2 package is
+fully `async`. You will need to provide a salt, a random value to prevent some
+cracking attacks known as rainbow tables, and argon2 does it for you:
+
+```js
+router.post('/', async ctx => {
+  const {name, password} = ctx.request.body
+  const hash = await argon2.hash(password, await argon2.generateSalt())
+  const user = new User({name, password: hash})
+  await user.save()
+  ctx.body = {user}
+  ctx.status = 201
+})
+
+router.patch('/:user', async ctx => {
+  const {password} = ctx.request.body
+  if (password != null) {
+    const hash = await argon2.hash(password, await argon2.generateSalt())
+    ctx.user.set('password', hash)
+  }
+
+  await ctx.user.save()
+  ctx.status = 200
+  ctx.body = {user: ctx.user}
+})
+```
+
+See, very much like the todo and the `completed` field, except an extra step is
+performed.
+
+You should be able to guess how to add the other methods to users and test it.
+
+(or just look at `routes/users.js`)
+
+### Tying todos and users
+
+Only users should be able to create new todos and update their own, so we need
+to change our todo routes to take user data too. First, let's define a
+middleware that fetches name and password from the body and verifies a user
+exists and the password matches.
+
+```js
+async function login(ctx, next) {
+  const {name, password} = ctx.request.body
+  const user = await User.findOne({name})
+  if (user.verify(password)) {
+    ctx.user = user.get('_id')
+    await next()
+  } else {
+    throw new Error('User not found.')
+  }
+}
+```
+
+And, where needed, we add it before the response middleware:
+
+```js
+router.post('/', login, async ctx => {
+```
+
+Don't forget to check if the user id matches the todo user id:
+
+```js
+  const {todo, user} = ctx
+  if (todo.get('user').toString() != user {
+    throw new Error('Invalid credentials.')
+  }
+```
+
+[argon2-url]: https://github.com/ranisalt/node-argon2
 [ava-url]: https://github.com/avajs/ava
 [babel-url]: https://babeljs.io/
 [koa-url]: https://github.com/koajs/koa/tree/v2.x

@@ -49,7 +49,7 @@ test('delete resource', async t => {
   })
   await user.save()
 
-  const {status} = await t.context.request.delete(`/users/${user.get('_id')}`)
+  const {status} = await t.context.request.delete(`/users/${user.get('name')}`)
   t.is(status, 204)
   t.is(await User.count(), 0)
 })

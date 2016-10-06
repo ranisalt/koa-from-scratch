@@ -9,17 +9,21 @@ export class User extends Model {
         throw new Error('Missing name.')
       }
 
-      if (!this.get('hash')) {
-        throw new Error('Missing hash.')
+      if (!this.get('password')) {
+        throw new Error('Missing password.')
       }
     })
+
+    this.verify = async password => {
+      return await argon2.verify(this.get('password'), password)
+    }
   }
 }
 
 const router = new Router()
 
 router.get('/', async ctx => {
-  ctx.body = await user.all()
+  ctx.body = await User.all()
 })
 
 router.post('/', async ctx => {
@@ -32,7 +36,7 @@ router.post('/', async ctx => {
 })
 
 router.param('user', async (name, ctx, next) => {
-  ctx.user = await User.findByName(name)
+  ctx.user = await User.findOne({name})
   await next()
 })
 

@@ -13,7 +13,8 @@ router.post('/', async ctx => {
   const {title} = ctx.request.body
   const todo = new Todo({title, completed: false})
   await todo.save()
-  ctx.status = 204
+  ctx.body = {todo}
+  ctx.status = 201
 })
 
 router.param('todo', async (id, ctx, next) => {
@@ -30,6 +31,11 @@ router.patch('/:todo', async ctx => {
   await ctx.todo.save()
   ctx.status = 200
   ctx.body = {todo: ctx.todo}
+})
+
+router.delete('/:todo', async ctx => {
+  await ctx.todo.remove()
+  ctx.status = 204
 })
 
 export default router

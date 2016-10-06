@@ -169,7 +169,7 @@ that's ES7 destructuring assignment, meaning `title = ctx.request.body.title`:
 router.post('/', async ctx => {
   const {title} = ctx.request.body
   todos.push({title, completed: false})
-  ctx.status = 204
+  ctx.status = 201
 })
 ```
 
@@ -228,10 +228,10 @@ is on a clean state. Let's first assure the todo-list is empty:
 
 ```js
 test('listing is empty', async t => {
-  const res = await t.context.request.get('/todos')
-  t.is(res.status, 200)
-  t.is(res.type, 'application/json')
-  t.is(res.body.length, 0)
+  const {body, status, type} = await t.context.request.get('/todos')
+  t.is(status, 200)
+  t.is(type, 'application/json')
+  t.is(body.length, 0)
 })
 ```
 
@@ -265,14 +265,12 @@ And it should pass the test and output coverage status. We still do not cover
 the post new todo route, let's fix it:
 
 ```js
-test('create new listing', async t => {
-  let res = await t.context.request.post('/todos').send({
+test('create new resource', async t => {
+  const {status} = await t.context.request.post('/todos').send({
     title: 'Be awesome'
   })
-  t.is(res.status, 204)
-
-  res = await t.context.request.get('/todos')
-  t.is(res.body.length, 1)
+  t.is(status, 201)
+  t.is(await Todo.count(), 1)
 })
 ```
 
@@ -397,6 +395,26 @@ It's needed to check if the body actually contains data to be updated, in our
 case only `completed`. Then, save the mutated object, set the status code and
 return body.
 
+To test, simply insert a new item to the todo list, then send a patch with its
+id and see it the value is updated:
+
+```js
+test('edit resource', async t => {
+  let todo = new Todo({
+    title: 'Be awesome'
+  })
+  await todo.save()
+
+  const {status} = await t.context.request.patch(`/todos/${todo.get('_id')}`).send({
+    completed: true
+  })
+  t.is(status, 200)
+
+  todo = await Todo.findById(todo.get('_id'))
+  t.is(todo.get('completed'), true)
+})
+```
+
 Let's also provide a deletion route, this one is easy:
 
 ```js
@@ -405,6 +423,26 @@ router.delete('/:user', async ctx => {
   ctx.status = 204
 })
 ```
+
+And to test, insert a new item, send a delete request and see if it gets
+deleted:
+
+```js
+test('delete resource', async t => {
+  let todo = new Todo({
+    title: 'Be awesome'
+  })
+  await todo.save()
+
+  const {status} = await t.context.request.delete(`/todos/${todo.get('_id')}`).send({
+    completed: true
+  })
+  t.is(status, 204)
+  t.is(await Todo.count(), 0)
+})
+```
+
+Well, that's it. Our model is complete now.
 
 [ava-url]: https://github.com/avajs/ava
 [babel-url]: https://babeljs.io/

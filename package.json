@@ -38,5 +38,10 @@
     "babel": "inherit",
     "require": "babel-register"
   },
+  "xo": {
+    "esnext": true,
+    "semicolon": false,
+    "space": true
+  },
   "private": true
 }

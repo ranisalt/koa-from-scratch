@@ -1,5 +1,7 @@
 # koa-from-scratch
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ranisalt/koa-from-scratch.svg)](https://greenkeeper.io/)
+
 First of all, you need to initialize your project using `npm init`. For this,
 we will use [Koa 2][koa-url], a next generation framework, together with
 [Mongorito][mongorito-url], an awesome MongoDB mapper, and [React][react-url]
